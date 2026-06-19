@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Ledger — Where every federal dollar goes</title>
+<meta name="description" content="An interactive look at the United States federal budget — where $7 trillion comes from and where it goes — built entirely from U.S. Treasury open data.">
+<meta name="theme-color" content="#0d2419">
+<meta property="og:title" content="The Ledger — Where every federal dollar goes">
+<meta property="og:description" content="$7 trillion in, $7 trillion out. The U.S. federal budget, drawn from the Treasury's own books.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://federal-ledger.pages.dev/">
+<meta property="og:image" content="https://federal-ledger.pages.dev/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Ledger — Where every federal dollar goes">
+<meta name="twitter:description" content="$7 trillion in, $7 trillion out. The U.S. federal budget, drawn from the Treasury's own books.">
+<meta name="twitter:image" content="https://federal-ledger.pages.dev/og.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f2ead7; --paper-2:#e9dfc6; --paper-3:#e1d5b6;
+  --ink:#16241c; --ink-soft:#4b5847; --ink-faint:#7a8473;
+  --green:#1f5138; --green-mid:#2f6a48; --green-deep:#0d2419; --green-bg:#0c2218;
+  --gold:#a9842c; --gold-bright:#d6b24a;
+  --red:#9a322b; --red-soft:#b9554d;
+  --line:rgba(22,36,28,.16); --line-soft:rgba(22,36,28,.09);
+  --shadow:0 1px 2px rgba(20,30,20,.06),0 8px 30px rgba(20,30,20,.07);
+  --maxw:1140px;
+  --serif:'Fraunces',Georgia,'Times New Roman',serif;
+  --sans:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--sans); color:var(--ink); background:var(--paper);
+  line-height:1.55; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  font-feature-settings:"tnum" 1,"cv05" 1;
+}
+.tnum{font-variant-numeric:tabular-nums}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
+section{position:relative}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.05;letter-spacing:-.01em}
+.eyebrow{font-family:var(--sans);font-weight:600;font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+
+/* paper grain overlay */
+.grain{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.5;mix-blend-mode:multiply}
+
+/* ---------- HERO ---------- */
+.hero{background:var(--green-bg);color:#f3ecd6;overflow:hidden;border-bottom:1px solid #000}
+.hero .wrap{padding-top:34px;padding-bottom:64px;position:relative;z-index:2}
+.hero .spiro{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.6}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;
+  padding-bottom:26px;border-bottom:1px solid rgba(214,178,74,.28);margin-bottom:7vh}
+.brand{display:flex;align-items:center;gap:13px}
+.brand .mark{width:34px;height:34px;flex:0 0 auto}
+.brand .name{font-family:var(--serif);font-weight:700;font-size:19px;letter-spacing:.02em;color:#f0e7cf}
+.brand .name b{color:var(--gold-bright);font-weight:700}
+.topbar .fy{font-size:12.5px;letter-spacing:.18em;text-transform:uppercase;color:rgba(214,178,74,.9);font-weight:600}
+.hero h1{font-size:clamp(38px,6.4vw,80px);font-weight:600;max-width:16ch;color:#f6efda;
+  letter-spacing:-.02em;margin:2vh 0 0}
+.hero h1 em{font-style:italic;color:var(--gold-bright);font-weight:500}
+.hero .lede{margin-top:24px;max-width:50ch;font-size:clamp(16px,1.7vw,19px);color:rgba(243,236,214,.82);line-height:1.6}
+.hero-figures{display:flex;flex-wrap:wrap;gap:18px 54px;margin-top:7vh;align-items:flex-end}
+.bignum{display:flex;flex-direction:column;gap:6px}
+.bignum .k{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:rgba(214,178,74,.85);font-weight:600}
+.bignum .v{font-family:var(--serif);font-weight:600;font-size:clamp(34px,5vw,60px);color:#f6efda;line-height:.95;letter-spacing:-.02em}
+.bignum .v small{font-size:.42em;font-weight:500;color:rgba(243,236,214,.7);letter-spacing:0;margin-left:.1em}
+.bignum.debt .v{color:var(--gold-bright)}
+.bignum .sub{font-size:13px;color:rgba(243,236,214,.62)}
+.scrollcue{margin-top:6vh;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:rgba(243,236,214,.5);display:flex;align-items:center;gap:10px}
+.scrollcue .ln{width:46px;height:1px;background:rgba(214,178,74,.5);position:relative;overflow:hidden}
+.scrollcue .ln::after{content:"";position:absolute;inset:0;background:var(--gold-bright);transform:translateX(-100%);animation:slide 2.4s infinite}
+@keyframes slide{0%{transform:translateX(-100%)}60%,100%{transform:translateX(120%)}}
+
+/* ---------- generic section ---------- */
+.band{padding:clamp(64px,9vh,118px) 0}
+.band.alt{background:linear-gradient(180deg,var(--paper-2),var(--paper))}
+.sec-head{max-width:62ch;margin-bottom:46px}
+.sec-head h2{font-size:clamp(28px,4vw,46px);margin-top:14px;font-weight:600;letter-spacing:-.02em}
+.sec-head p{margin-top:16px;font-size:clamp(15.5px,1.5vw,18px);color:var(--ink-soft);max-width:54ch}
+.rule{display:flex;align-items:center;gap:14px;color:var(--gold);margin:0 auto}
+.rule::before,.rule::after{content:"";height:1px;background:var(--line);flex:1}
+.rule .dia{width:7px;height:7px;background:var(--gold);transform:rotate(45deg)}
+
+/* ---------- balance ---------- */
+.balance{display:grid;grid-template-columns:1fr;gap:30px}
+.bal-flow{background:var(--green-deep);border-radius:16px;padding:clamp(26px,3.4vw,44px);color:#f3ecd6;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.bal-flow .spiro{position:absolute;inset:0;opacity:.5;pointer-events:none}
+.bal-row{display:grid;grid-template-columns:1fr;gap:22px;position:relative;z-index:2}
+@media(min-width:760px){.bal-row{grid-template-columns:1fr 1fr 1fr;align-items:stretch}}
+.bal-cell{padding:4px 0}
+.bal-cell .k{font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:rgba(214,178,74,.85);font-weight:600;margin-bottom:10px}
+.bal-cell .v{font-family:var(--serif);font-size:clamp(30px,3.8vw,46px);font-weight:600;line-height:1;letter-spacing:-.02em}
+.bal-cell.out .v{color:#f6efda}
+.bal-cell.in .v{color:#9fd6ad}
+.bal-cell.gap .v{color:var(--red-soft)}
+.bal-cell .d{margin-top:9px;font-size:13.5px;color:rgba(243,236,214,.68);max-width:30ch}
+.bal-meter{height:16px;border-radius:9px;background:rgba(255,255,255,.08);margin-top:30px;overflow:hidden;position:relative;z-index:2;display:flex}
+.bal-meter .filled{background:linear-gradient(90deg,#2f6a48,#3f8159)}
+.bal-meter .borrowed{background:repeating-linear-gradient(45deg,var(--red),var(--red) 6px,#7e251f 6px,#7e251f 12px)}
+.bal-caption{margin-top:18px;font-size:15px;color:rgba(243,236,214,.8);position:relative;z-index:2}
+.bal-caption b{color:var(--gold-bright);font-weight:600}
+.pullquote{font-family:var(--serif);font-size:clamp(22px,3vw,33px);font-weight:500;line-height:1.25;
+  max-width:24ch;color:var(--ink);letter-spacing:-.01em}
+.pullquote .red{color:var(--red)}
+
+/* ---------- bars breakdown ---------- */
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px;align-items:center}
+.toggle{display:inline-flex;background:var(--paper-3);border:1px solid var(--line);border-radius:999px;padding:4px}
+.toggle button{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink-soft);
+  background:none;border:0;padding:8px 16px;border-radius:999px;cursor:pointer;transition:.18s;letter-spacing:.01em}
+.toggle button[aria-pressed=true]{background:var(--green-deep);color:#f3ecd6;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.ribbon{display:flex;height:54px;border-radius:8px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:34px;border:1px solid var(--line)}
+.ribbon span{height:100%;position:relative;overflow:hidden;transition:flex-grow .9s cubic-bezier(.5,0,.1,1);min-width:1px;cursor:default}
+.ribbon span::after{content:attr(data-l);position:absolute;left:7px;top:50%;transform:translateY(-50%);
+  font-size:11px;font-weight:600;color:rgba(255,255,255,.94);white-space:nowrap;letter-spacing:.01em;
+  text-shadow:0 1px 2px rgba(0,0,0,.35);opacity:0;transition:.2s}
+.ribbon span.lab::after{opacity:1}
+
+.bars{display:flex;flex-direction:column;gap:2px}
+.bar{display:grid;grid-template-columns:200px 1fr 132px;align-items:center;gap:16px;
+  padding:13px 12px;border-radius:9px;transition:background .18s;cursor:default}
+.bar:hover{background:var(--paper-3)}
+.bar .name{font-weight:600;font-size:15px}
+.bar .name .note{display:block;font-weight:400;font-size:12.5px;color:var(--ink-faint);margin-top:2px;line-height:1.35;
+  max-height:0;opacity:0;overflow:hidden;transition:.25s}
+.bar:hover .name .note,.bar.open .name .note{max-height:48px;opacity:1;margin-top:4px}
+.bar .track{height:26px;background:var(--paper-3);border-radius:6px;overflow:hidden;position:relative}
+.bar .fill{height:100%;width:0;border-radius:6px;transition:width 1s cubic-bezier(.5,0,.1,1)}
+.bar .fill.hatch{position:relative}
+.bar .fill.hatch::before{content:"";position:absolute;inset:0;border-radius:6px;
+  background-image:repeating-linear-gradient(45deg,rgba(255,250,235,.30) 0 3px,transparent 3px 8px)}
+.bar .amt{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;font-size:15.5px}
+.bar .amt small{display:block;font-weight:500;font-size:11.5px;color:var(--ink-faint);margin-top:1px}
+.bar.neg .amt{color:var(--red)}
+@media(max-width:680px){
+  .bar{grid-template-columns:1fr 92px;gap:6px 12px}
+  .bar .track{grid-column:1/-1;order:3}
+  .bar .name .note{max-height:48px;opacity:1;margin-top:4px}
+}
+
+/* ---------- debt / charts ---------- */
+.debt-band{background:var(--green-bg);color:#f3ecd6;overflow:hidden}
+.debt-band .spiro{position:absolute;inset:0;opacity:.4;pointer-events:none;z-index:1}
+.debt-band .wrap{position:relative;z-index:2}
+.debt-band .eyebrow{color:var(--gold-bright)}
+.debt-band h2{color:#f6efda}
+.debt-band .sec-head p{color:rgba(243,236,214,.78)}
+.cmp{display:grid;gap:14px;margin:34px 0}
+@media(min-width:720px){.cmp{grid-template-columns:repeat(3,1fr)}}
+.cmp .card{background:rgba(255,255,255,.045);border:1px solid rgba(214,178,74,.22);border-radius:13px;padding:24px}
+.cmp .card .v{font-family:var(--serif);font-size:clamp(30px,4vw,44px);font-weight:600;color:var(--gold-bright);line-height:1;letter-spacing:-.02em}
+.cmp .card .k{margin-top:11px;font-size:14px;color:rgba(243,236,214,.82);line-height:1.45}
+.cmp .card .k b{color:#f6efda;font-weight:600}
+.chartbox{margin-top:18px;background:rgba(255,255,255,.04);border:1px solid rgba(214,178,74,.2);border-radius:14px;padding:clamp(16px,2.4vw,28px)}
+.chartbox.light{background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow)}
+.chartbox h3{font-size:19px;font-weight:600;margin-bottom:3px}
+.chartbox .csub{font-size:13.5px;color:rgba(243,236,214,.62);margin-bottom:14px}
+.chartbox.light .csub{color:var(--ink-soft)}
+.legend{display:flex;gap:20px;flex-wrap:wrap;font-size:13px;margin-top:14px}
+.legend i{display:inline-block;width:13px;height:3px;border-radius:2px;margin-right:7px;vertical-align:middle}
+svg .gridln{stroke:currentColor;opacity:.13}
+svg text{font-family:var(--sans)}
+
+/* ---------- methodology / footer ---------- */
+.method{background:var(--green-deep);color:rgba(243,236,214,.85);padding:64px 0 30px}
+.method h3{color:#f6efda;font-size:22px;margin-bottom:16px}
+.method .cols{display:grid;gap:30px}
+@media(min-width:760px){.method .cols{grid-template-columns:1.3fr 1fr}}
+.method p{font-size:14px;line-height:1.65;color:rgba(243,236,214,.74);margin-bottom:12px;max-width:62ch}
+.method a{color:var(--gold-bright);text-decoration:none;border-bottom:1px solid rgba(214,178,74,.4)}
+.method ul{list-style:none;font-size:13.5px;line-height:1.7;color:rgba(243,236,214,.74)}
+.method ul li{padding-left:16px;position:relative}
+.method ul li::before{content:"§";position:absolute;left:0;color:var(--gold);font-size:11px;top:3px}
+.colophon{margin-top:40px;padding-top:22px;border-top:1px solid rgba(214,178,74,.2);
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:12.5px;color:rgba(243,236,214,.55)}
+.colophon b{color:rgba(243,236,214,.8);font-weight:600}
+/* Buy me a coffee — gold pill in the Ledger palette (matches the Dream menu button) */
+.coffee-wrap{text-align:center;margin-top:24px}
+a.coffee{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;
+  border:1px solid rgba(214,178,74,.42);background:rgba(214,178,74,.08);color:var(--gold-bright);
+  text-decoration:none;font:600 12px/1 Inter,system-ui,sans-serif;letter-spacing:.05em;white-space:nowrap;
+  transition:background .22s ease,border-color .22s ease,transform .22s ease,box-shadow .22s ease}
+a.coffee:hover{background:rgba(214,178,74,.18);border-color:var(--gold-bright);
+  transform:translateY(-1px);box-shadow:0 6px 22px -8px rgba(214,178,74,.5)}
+a.coffee .cup{font-size:15px;line-height:1}
+
+/* HHS split — 3-segment stacked bar */
+.splitbar{display:flex;height:48px;border-radius:8px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow)}
+.splitbar span{display:flex;align-items:center;padding:0 13px;color:#fff;font-weight:600;font-size:13px;white-space:nowrap;min-width:0;overflow:hidden;transition:flex-grow .9s cubic-bezier(.5,0,.1,1)}
+.split-legend{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:16px;font-size:13.5px;color:var(--ink-soft)}
+.split-legend div{max-width:30ch}
+.split-legend b{color:var(--ink);font-weight:600}
+.split-legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+/* rate slider (lives in the dark cost-of-debt band) */
+.rateslider{margin-top:26px;background:rgba(255,255,255,.04);border:1px solid rgba(214,178,74,.22);border-radius:14px;padding:clamp(18px,2.4vw,26px)}
+.rateslider h3{font-size:18px;font-weight:600;margin-bottom:3px}
+.rateslider .csub{font-size:13px;color:rgba(243,236,214,.6);margin-bottom:18px}
+.rate-out{display:flex;flex-wrap:wrap;gap:14px 40px;align-items:baseline;margin-bottom:18px}
+.rate-out .big{font-family:var(--serif);font-size:clamp(32px,4.5vw,48px);font-weight:600;color:var(--gold-bright);line-height:1}
+.rate-out .lbl{font-size:13px;color:rgba(243,236,214,.72);margin-top:5px}
+.rate-out .vs{font-size:13.5px;color:rgba(243,236,214,.8)}
+.rate-out .vs b{color:#f6efda}
+.rateslider input[type=range]{width:100%;accent-color:#d6b24a;height:6px;cursor:pointer;margin:6px 0}
+.rate-ticks{display:flex;justify-content:space-between;font-size:11px;color:rgba(243,236,214,.5);margin-top:4px}
+.rate-ticks b{color:rgba(214,178,74,.9)}
+
+/* shifting budget — diverging share-change leaderboard */
+.shifts{display:flex;flex-direction:column;gap:2px}
+.shiftrow{display:grid;grid-template-columns:200px 86px 1fr 104px;align-items:center;gap:16px;padding:13px 12px;border-radius:9px;transition:background .18s}
+.shiftrow:hover{background:var(--paper-3)}
+.shiftrow .sname{font-weight:600;font-size:15px}
+.shiftrow .sname .note{display:block;font-weight:400;font-size:12px;color:var(--ink-faint);margin-top:2px;line-height:1.35}
+.shiftrow .smult{font-family:var(--serif);font-weight:600;font-size:21px;text-align:right;color:var(--ink)}
+.shiftrow .smult small{display:block;font-family:var(--sans);font-weight:500;font-size:9.5px;color:var(--ink-faint);letter-spacing:.07em;text-transform:uppercase;margin-top:1px}
+.shiftrow .sbar{position:relative;height:28px;background:var(--paper-3);border-radius:6px;overflow:hidden}
+.shiftrow .sbar .zero{position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(22,36,28,.28);z-index:2}
+.shiftrow .sbar .fill{position:absolute;top:0;bottom:0;width:0;transition:width 1s cubic-bezier(.5,0,.1,1)}
+.shiftrow.gain .fill{background:linear-gradient(90deg,#b08a2e,#caa54a);border-radius:0 5px 5px 0}
+.shiftrow.lose .fill{background:#b9554d;border-radius:5px 0 0 5px}
+.shiftrow .schg{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;font-size:16px}
+.shiftrow.gain .schg{color:var(--gold)}
+.shiftrow.lose .schg{color:var(--red)}
+.shiftrow .schg small{display:block;font-weight:500;font-size:9.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.05em;margin-top:1px}
+.shift-note{margin-top:22px;font-size:13.5px;color:var(--ink-soft);max-width:70ch;line-height:1.55}
+.shift-note b{color:var(--ink);font-weight:600}
+.shift-note .dim{color:var(--ink-faint)}
+@media(max-width:680px){
+  .shiftrow{grid-template-columns:1fr 70px;gap:6px 12px}
+  .shiftrow .smult{grid-row:1;grid-column:2;text-align:right}
+  .shiftrow .sbar{grid-column:1/-1;order:3}
+  .shiftrow .schg{grid-column:1/-1;order:4;text-align:left;display:flex;gap:6px;align-items:baseline}
+  .shiftrow .schg small{display:inline}
+}
+.hero-note{margin-top:30px;font-size:13.5px;color:rgba(243,236,214,.66);max-width:56ch;border-left:2px solid rgba(214,178,74,.55);padding-left:14px;line-height:1.55}
+.hero-note b{color:rgba(243,236,214,.9);font-weight:600}
+
+/* leads */
+.leads{display:grid;gap:16px}
+@media(min-width:700px){.leads{grid-template-columns:1fr 1fr}}
+.lead{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:22px 24px 18px;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.lead .n{font-family:var(--serif);font-size:13px;font-weight:600;color:var(--gold);letter-spacing:.08em}
+.lead h3{font-size:19px;margin:7px 0 9px;line-height:1.18;font-weight:600}
+.lead p{font-size:13.8px;color:var(--ink-soft);line-height:1.55;flex:1}
+.lead .src{margin-top:15px;padding-top:13px;border-top:1px solid var(--line-soft);font-size:12.5px;color:var(--ink-faint);display:flex;flex-wrap:wrap;gap:5px 9px;align-items:baseline}
+.lead .src b{color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:.09em;font-size:10.5px;width:100%}
+.lead .src a{color:var(--green-mid);text-decoration:none;border-bottom:1px solid var(--line)}
+.lead .src a:hover{border-color:var(--green-mid);color:var(--green)}
+
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+.reveal.in,.band.in .reveal{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}.scrollcue .ln::after{animation:none}}
+</style>
+</head>
+<body>
+<svg class="grain"><filter id="gr"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#gr)" opacity="0.045"/></svg>
+
+<!-- ================= HERO ================= -->
+<header class="hero" id="top">
+  <svg class="spiro" id="heroSpiro" preserveAspectRatio="xMidYMid slice"></svg>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <svg class="mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <circle cx="20" cy="20" r="18.5" stroke="#d6b24a" stroke-width="1.2"/>
+          <circle cx="20" cy="20" r="14.5" stroke="#d6b24a" stroke-width=".7" opacity=".6"/>
+          <path d="M20 7v26M12 12.5h13.2a4.5 4.5 0 010 9H14.6a4.5 4.5 0 000 9H28" stroke="#d6b24a" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+        <span class="name">THE <b>LEDGER</b></span>
+      </div>
+      <span class="fy" id="fyTag">Fiscal Year 2025</span>
+    </div>
+
+    <h1>Where every <em>federal dollar</em> actually goes.</h1>
+    <p class="lede">In one year the United States government spent more than the entire economic output of every country on Earth except two. Here is that money — where it came from, where it went, and the gap that's left — drawn entirely from the U.S. Treasury's own books.</p>
+
+    <div class="hero-figures">
+      <div class="bignum"><span class="k">Spent in <span id="fyA">2025</span></span><span class="v" id="heroOutlays">$0</span><span class="sub">total federal outlays</span></div>
+      <div class="bignum"><span class="k">Collected</span><span class="v" id="heroReceipts">$0</span><span class="sub">total federal revenue</span></div>
+      <div class="bignum debt"><span class="k">National debt — right now</span><span class="v tnum" id="debtClock">$0</span><span class="sub" id="debtRate">growing every second</span></div>
+    </div>
+
+    <p class="hero-note">Spending and revenue are for <b>fiscal year 2025</b> (Oct 2024–Sep 2025), the most recent <b>complete</b> year. The national debt is <b>live</b> — the real figure as of today, still climbing as you read.</p>
+
+    <div class="scrollcue"><span class="ln"></span> Follow the money</div>
+  </div>
+</header>
+
+<!-- ================= BALANCE ================= -->
+<section class="band alt" id="balance">
+  <div class="wrap reveal">
+    <div class="sec-head">
+      <span class="eyebrow">The Shortfall</span>
+      <h2>The government spends far more than it takes in.</h2>
+      <p>Every dollar of the gap between revenue and spending is borrowed — and added to the national debt that ticks upward above.</p>
+    </div>
+    <div class="balance">
+      <div class="bal-flow">
+        <svg class="spiro" id="balSpiro" preserveAspectRatio="xMidYMid slice"></svg>
+        <div class="bal-row">
+          <div class="bal-cell in"><div class="k">Revenue in</div><div class="v" id="balIn">$0</div><div class="d">taxes, payroll contributions, tariffs &amp; fees</div></div>
+          <div class="bal-cell out"><div class="k">Spending out</div><div class="v" id="balOut">$0</div><div class="d">benefits, defense, interest &amp; everything else</div></div>
+          <div class="bal-cell gap"><div class="k">Borrowed to cover the gap</div><div class="v" id="balGap">$0</div><div class="d">the annual deficit, financed with new debt</div></div>
+        </div>
+        <div class="bal-meter" id="balMeter"><span class="filled" style="flex-grow:0"></span><span class="borrowed" style="flex-grow:0"></span></div>
+        <div class="bal-caption" id="balCap">&nbsp;</div>
+      </div>
+      <p class="pullquote">For every <b>$1.00</b> Washington collected, it spent <span class="red" id="pqSpent">$0</span> — and put the difference on the nation's tab.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= WHERE IT GOES ================= -->
+<section class="band" id="goes">
+  <div class="wrap reveal">
+    <div class="sec-head">
+      <span class="eyebrow">Where it goes</span>
+      <h2>Three out of every four dollars are a check to someone.</h2>
+      <p>Most federal spending isn't discretionary at all — it's Social Security, Medicare and Medicaid, veterans' care, and the interest on past borrowing. Hover any line to see what it funds.</p>
+    </div>
+    <div class="toolbar">
+      <div class="toggle" id="goesToggle" role="group" aria-label="Display units">
+        <button data-mode="total" aria-pressed="true">Total</button>
+        <button data-mode="house" aria-pressed="false">Per household</button>
+        <button data-mode="sec" aria-pressed="false">Per second</button>
+      </div>
+    </div>
+    <div class="ribbon" id="goesRibbon" aria-hidden="true"></div>
+    <div class="bars" id="goesBars"></div>
+  </div>
+</section>
+
+<!-- ================= INSIDE THE BIGGEST AGENCY: MEDICARE vs MEDICAID ================= -->
+<section class="band" id="hhs">
+  <div class="wrap reveal">
+    <div class="sec-head">
+      <span class="eyebrow">Inside the biggest agency</span>
+      <h2>Health &amp; Human Services is really two giant programs.</h2>
+      <p>That top $1.9T bar is mostly two checks: <em>Medicare</em> (coverage for 65+ and the disabled) and <em>Medicaid</em> (the federal share of state health coverage). Everything else the department does — NIH, CDC, the FDA — fits in what's left.</p>
+    </div>
+    <div class="splitbar" id="hhsSplit"></div>
+    <div class="split-legend" id="hhsLegend"></div>
+  </div>
+</section>
+
+<!-- ================= HOW THE BUDGET SHIFTED ================= -->
+<section class="band alt" id="shifts">
+  <div class="wrap reveal">
+    <div class="sec-head">
+      <span class="eyebrow">How it's changed</span>
+      <h2>The budget grew 1.9× in a decade — but not evenly.</h2>
+      <p>Since FY2015 total spending nearly doubled. Categories that grew <em>faster</em> than that gained a bigger slice of the pie; those that grew slower <em>shrank</em> as a share — even though almost every line rose in raw dollars. The standout: interest on the debt tripled.</p>
+    </div>
+    <div class="shifts" id="shiftRows"></div>
+    <p class="shift-note" id="shiftNote">&nbsp;</p>
+  </div>
+</section>
+
+<!-- ================= WHERE IT COMES FROM ================= -->
+<section class="band alt" id="comes">
+  <div class="wrap reveal">
+    <div class="sec-head">
+      <span class="eyebrow">Where it comes from</span>
+      <h2>Almost all of it is paid by working people.</h2>
+      <p>Income tax and the payroll taxes withheld from paychecks supply the overwhelming majority of federal revenue. Corporate taxes and tariffs together raise less than payroll taxes alone.</p>
+    </div>
+    <div class="ribbon" id="comesRibbon" aria-hidden="true"></div>
+    <div class="bars" id="comesBars"></div>
+  </div>
+</section>
+
+<!-- ================= THE RISE OF THE TARIFF ================= -->
+<section class="band debt-band" id="tariff">
+  <svg class="spiro" id="tariffSpiro" preserveAspectRatio="xMidYMid slice"></svg>
+  <div class="wrap reveal">
+    <div class="sec-head">
+      <span class="eyebrow">The rise of the tariff</span>
+      <h2>A rounding error became a revenue lever.</h2>
+      <p>For most of the past decade, customs duties were a rounding error — about 1% of federal revenue. In FY2025 they more than doubled, to $195 billion, as sweeping new tariffs took effect. Tariffs are taxes on imports, ultimately paid through the prices Americans pay.</p>
+    </div>
+    <div class="cmp" id="tariffCmp"></div>
+    <div class="chartbox">
+      <h3>Customs duties (tariffs) collected</h3>
+      <div class="csub">By fiscal year · U.S. Treasury — collections, not tariff rates</div>
+      <div id="tariffChart"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= WHO CASHES THE CHECKS ================= -->
+<section class="band" id="contracts">
+  <div class="wrap reveal">
+    <div class="sec-head">
+      <span class="eyebrow">Follow the money</span>
+      <h2>And here's who cashes the checks.</h2>
+      <p>Beyond benefits and interest, Washington <em>buys things</em> — and a handful of corporations are awarded an outsized share. These are the companies awarded the most federal <strong>contract</strong> money in FY2025, grouped by parent company. Color marks the sector — and nearly every name is either weapons or (often military) health care. Hover any line to see what they sell.</p>
+    </div>
+    <div class="bars" id="contractBars"></div>
+    <div class="split-legend" id="contractorLegend"></div>
+    <p class="pullquote" id="contractPq" style="margin-top:36px">&nbsp;</p>
+  </div>
+</section>
+
+<!-- ================= WHERE CONTRACTS LAND — BY STATE ================= -->
+<section class="band alt" id="bystate">
+  <div class="wrap reveal">
+    <div class="sec-head">
+      <span class="eyebrow">Where it lands</span>
+      <h2>Where the money lands depends on how it travels.</h2>
+      <p id="stateLede">Washington sends money to the states two very different ways. <b>Contracts</b> are what it <em>buys</em> — and they pool around the national-security economy. <b>Grants</b> are what it <em>returns</em> to the states — Medicaid, highways, food aid, schools, housing — and they track where people are. Switch the lens to see the two maps diverge.</p>
+    </div>
+    <div class="toolbar">
+      <div class="toggle" id="lensToggle" role="group" aria-label="Type of spending">
+        <button data-lens="contracts" aria-pressed="true">Contracts</button>
+        <button data-lens="grants" aria-pressed="false">Grants to states</button>
+      </div>
+      <div class="toggle" id="stateToggle" role="group" aria-label="Display units">
+        <button data-mode="total" aria-pressed="true">Total</button>
+        <button data-mode="capita" aria-pressed="false">Per person</button>
+      </div>
+    </div>
+    <div class="bars" id="stateBars"></div>
+    <p class="shift-note" id="stateNote">&nbsp;</p>
+    <p class="shift-note dim" id="stateCaveat">The biggest flow of all — <b>direct payments to people</b> (Social Security, Medicare, SNAP, ~$3 trillion) — isn't shown here. Federal data books almost all of it as aggregated &ldquo;multiple recipients&rdquo; recorded at payment processors and insurer headquarters, not where the recipients live, so a by-state map of it would be flatly misleading.</p>
+  </div>
+</section>
+
+
+<!-- ================= COST OF DEBT ================= -->
+<section class="band debt-band" id="debt">
+  <svg class="spiro" id="debtSpiro" preserveAspectRatio="xMidYMid slice"></svg>
+  <div class="wrap reveal">
+    <div class="sec-head">
+      <span class="eyebrow">The cost of debt</span>
+      <h2>Interest is now one of the biggest things we buy.</h2>
+      <p>Years of borrowing, met by higher interest rates, have pushed the net interest on the debt past the entire military budget — and it grows automatically, before Congress decides a single thing. (Figures are <em>net</em> interest paid to the public; the government also pays ~$0.25T more to its own trust funds.)</p>
+    </div>
+    <div class="cmp" id="debtCmp"></div>
+    <div class="chartbox">
+      <h3>Net interest paid on the national debt</h3>
+      <div class="csub">Interest paid to the public (excludes intragovernmental), by fiscal year · U.S. Treasury</div>
+      <div id="interestChart"></div>
+    </div>
+    <div class="rateslider" id="rateSlider">
+      <h3>What if rates stay high?</h3>
+      <div class="csub">The debt reprices as old bonds mature and roll over at today's rates. Drag the average rate to see the yearly bill.</div>
+      <div class="rate-out">
+        <div><div class="big" id="rateInterest">$0</div><div class="lbl">a year in interest at an average rate of <span id="rateVal">0%</span></div></div>
+        <div class="vs" id="rateVs">&nbsp;</div>
+      </div>
+      <input type="range" id="rateRange" min="1.5" max="7" step="0.05" value="3.35" aria-label="Average interest rate">
+      <div class="rate-ticks" id="rateTicks"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= WHO WE OWE ================= -->
+<section class="band alt" id="whoweowe">
+  <div class="wrap reveal">
+    <div class="sec-head">
+      <span class="eyebrow">Who we owe</span>
+      <h2>Most of the debt is owed to ourselves — but trillions are held abroad.</h2>
+      <p id="wwoIntro">Of the $39T debt, about $31.6T is held by the public; foreign governments and investors hold roughly $9.3T of that. Japan is the largest single creditor — and China, once #1, has nearly halved its holdings since 2013.</p>
+    </div>
+    <div class="bars" id="wwoBars"></div>
+    <div class="split-legend" id="wwoLegend"></div>
+    <p class="shift-note" id="wwoNote">&nbsp;</p>
+  </div>
+</section>
+
+<!-- ================= THE GAP OVER TIME ================= -->
+<section class="band" id="gap">
+  <div class="wrap reveal">
+    <div class="sec-head">
+      <span class="eyebrow">A decade of deficits</span>
+      <h2>The gap didn't close after the pandemic. It became the baseline.</h2>
+      <p>Spending surged in 2020 and never returned to earth, while revenue grew far more slowly. The shaded area is borrowed money — a deficit in every single year.</p>
+    </div>
+    <div class="chartbox light">
+      <h3>Spending vs. revenue</h3>
+      <div class="csub">Federal outlays and receipts by fiscal year · U.S. Treasury</div>
+      <div id="gapChart"></div>
+      <div class="legend">
+        <span><i style="background:#a9842c"></i>Spending</span>
+        <span><i style="background:#2f6a48"></i>Revenue</span>
+        <span><i style="background:#9a322b;opacity:.5"></i>Borrowed (deficit)</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DEBT AS A SHARE OF THE ECONOMY ================= -->
+<section class="band alt" id="debtgdp">
+  <div class="wrap reveal">
+    <div class="sec-head">
+      <span class="eyebrow">Against the economy</span>
+      <h2>The debt is now bigger than everything the country makes in a year.</h2>
+      <p>Dollars alone don't show the weight of the debt — its size <em>relative to the economy</em> does. Gross federal debt is about <b>123% of GDP</b>, and the slice held by the public is near <b>99%</b> — both close to their post-World-War-II highs.</p>
+    </div>
+    <div class="chartbox light">
+      <h3>Federal debt as a share of GDP</h3>
+      <div class="csub">Gross debt and debt held by the public, % of GDP, by year · FRED / U.S. Treasury</div>
+      <div id="debtGdpChart"></div>
+      <div class="legend">
+        <span><i style="background:#9a322b"></i>Gross federal debt</span>
+        <span><i style="background:#2f6a48"></i>Held by the public</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LEADS ================= -->
+<section class="band alt" id="leads">
+  <div class="wrap reveal">
+    <div class="sec-head">
+      <span class="eyebrow">For the reporter</span>
+      <h2>Where the real stories are buried.</h2>
+      <p>This page shows the <em>what</em>. The <em>why</em> — who fought for each dollar and who profits from it — lives in other public records. Here are nine threads worth pulling, and exactly where to start digging.</p>
+    </div>
+    <div class="leads">
+      <div class="lead"><div class="n">01</div><h3>Who actually voted for this</h3><p>Every dollar was authorized by a vote. Pull the roll calls on the FY2025 appropriations bills, the NDAA, and the debt-ceiling deal — then see which members funded the agencies their districts live on while voting "no" for the cameras.</p><div class="src"><b>Where to start</b><a href="https://www.congress.gov/roll-call-votes" target="_blank" rel="noopener">Congress.gov roll-call votes</a> · <a href="https://www.govtrack.us/congress/votes" target="_blank" rel="noopener">GovTrack</a></div></div>
+
+      <div class="lead"><div class="n">02</div><h3>The $2 trillion hidden in the tax code</h3><p>Mortgage breaks, the employer health exclusion, capital-gains rates — "tax expenditures" are spending by another name, and they never appear in the $7T. Together (over $2 trillion a year) they cost more than Social Security. Who benefits most?</p><div class="src"><b>Where to start</b><a href="https://www.jct.gov/publications/" target="_blank" rel="noopener">Joint Committee on Taxation</a> · <a href="https://home.treasury.gov/policy-issues/tax-policy/tax-expenditures" target="_blank" rel="noopener">Treasury</a></div></div>
+
+      <div class="lead"><div class="n">03</div><h3>Contracts → lobbying → the committees</h3><p>The biggest contractors spend tens of millions lobbying. Cross their awards against their lobbying filings and the donations flowing to the Armed Services and Appropriations members who set their budgets.</p><div class="src"><b>Where to start</b><a href="https://www.opensecrets.org/federal-lobbying" target="_blank" rel="noopener">OpenSecrets</a> · <a href="https://lda.senate.gov/system/public/" target="_blank" rel="noopener">Senate LDA</a> · <a href="https://www.fec.gov/data/" target="_blank" rel="noopener">FEC</a></div></div>
+
+      <div class="lead"><div class="n">04</div><h3>Who holds the $39 trillion</h3><p>Every dollar of debt is someone's asset. How much does the Federal Reserve own? Which foreign governments? And what happens to next year's interest bill as old low-rate bonds mature and reset?</p><div class="src"><b>Where to start</b><a href="https://home.treasury.gov/data/treasury-international-capital-tic-system" target="_blank" rel="noopener">Treasury TIC</a> · <a href="https://www.federalreserve.gov/releases/h41/" target="_blank" rel="noopener">Fed H.4.1</a></div></div>
+
+      <div class="lead"><div class="n">05</div><h3>The earmark comeback</h3><p>"Community Project Funding" brought earmarks back — thousands of member-requested line items, each with a named sponsor and recipient. Map them against the sponsors' donors and home districts.</p><div class="src"><b>Where to start</b><a href="https://appropriations.house.gov/" target="_blank" rel="noopener">House Appropriations disclosures</a></div></div>
+
+      <div class="lead"><div class="n">06</div><h3>The money that never should have gone out</h3><p>The government admits to <em>hundreds of billions</em> a year in "improper payments." Which programs leak the most, how much is fraud versus error, and how little ever gets clawed back?</p><div class="src"><b>Where to start</b><a href="https://www.paymentaccuracy.gov/" target="_blank" rel="noopener">PaymentAccuracy.gov</a> · <a href="https://www.gao.gov/" target="_blank" rel="noopener">GAO</a></div></div>
+
+      <div class="lead"><div class="n">07</div><h3>The no-bid economy</h3><p>How much of the contract money skips competition entirely? Filter awards for sole-source and "limited competition," by agency and by company, and watch the patterns emerge.</p><div class="src"><b>Where to start</b><a href="https://www.usaspending.gov/search" target="_blank" rel="noopener">USAspending (extent-competed)</a></div></div>
+
+      <div class="lead"><div class="n">08</div><h3>The privatization of public health</h3><p>Optum and Humana now collect tens of billions running Medicare Advantage and military health. Is the government paying private middlemen more than it would cost to deliver the care directly?</p><div class="src"><b>Where to start</b><a href="https://www.cms.gov/data-research" target="_blank" rel="noopener">CMS data</a> · <a href="https://www.medpac.gov/" target="_blank" rel="noopener">MedPAC</a></div></div>
+
+      <div class="lead"><div class="n">09</div><h3>Farm subsidies: who really collects</h3><p>Crop subsidies are sold as a lifeline for the family farm — yet a large share flows to the biggest operations and absentee landowners. Follow the payments to the names behind them.</p><div class="src"><b>Where to start</b><a href="https://farm.ewg.org/" target="_blank" rel="noopener">EWG Farm Subsidy Database</a> · <a href="https://www.usaspending.gov/" target="_blank" rel="noopener">USAspending</a></div></div>
+
+      <div class="lead"><div class="n">10</div><h3>The black budget hides in plain sight</h3><p>Classified spending is appropriated like everything else, so it's already <em>inside</em> this $7T — mostly within Defense; only the program detail is secret. The intelligence top-line is even published: ~$101B in FY2025 ($73.3B civilian + $27.8B military). Funding anything <em>outside</em> appropriations is illegal — that's what made Iran-Contra a scandal. The deeper gap: the Pentagon just failed its <b>8th straight audit</b>, unable to account for $4.65T in assets.</p><div class="src"><b>Where to start</b><a href="https://www.dni.gov/index.php/what-we-do/ic-budget" target="_blank" rel="noopener">ODNI intelligence budget</a> · <a href="https://crsreports.congress.gov/product/pdf/IF/IF12943" target="_blank" rel="noopener">CRS: classified programs</a> · <a href="https://www.gao.gov/financial-management" target="_blank" rel="noopener">GAO / DoD audit</a></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= METHODOLOGY ================= -->
+<footer class="method" id="method">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h3>How this was built</h3>
+        <p>The budget figures — spending, revenue, the deficit and the live debt — come directly from the <b>U.S. Treasury</b>'s open-data API at <a href="https://fiscaldata.treasury.gov" target="_blank" rel="noopener">fiscaldata.treasury.gov</a>, with no API key. The contractor rankings come from <b>USAspending.gov</b>, and per-household figures use U.S. Census household estimates.</p>
+        <p>Spending and revenue are <b>net</b> figures from the Monthly Treasury Statement for <span id="mFy">fiscal year 2025</span> (<span id="mPer">Oct 2024 – Sep 2025</span>), the most recent complete year, so revenue minus spending equals the reported deficit to the dollar. The agency breakdown is reconciled to total outlays; "Social Security" is the off-budget trust funds (OASDI; the off-budget total also includes a small Postal Service amount), and ~$0.3T of "offsetting receipts" is netted out to reach the official total. <b>Interest</b> is <em>net</em> interest paid to the public (~$0.97T); gross interest including the ~$0.25T Treasury pays its own trust funds is ~$1.22T. <b>Contractor</b> figures are obligations (money awarded), grouped by parent company, and cover the contract slice of spending — not the whole $7T. The live debt is <b>Debt to the Penny</b>, advancing at the actual rate gross debt grew over the past year (which can outpace the deficit). Per-household figures use <span id="mHh">131.4 million</span> U.S. households.</p>
+        <p style="color:rgba(243,236,214,.55);font-size:13px">The Ledger is independent and non-partisan: the budget numbers are reported straight from Treasury. The "Leads" section and section framing are editorial — pointers for further reporting, not neutral fact.</p>
+      </div>
+      <div>
+        <h3>Sources</h3>
+        <ul id="srcList"></ul>
+      </div>
+    </div>
+    <div class="colophon">
+      <span>Data current as of <b id="cfDate">—</b>. National debt as of <b id="cfDebt">—</b>.</span>
+      <span>The Ledger · built with U.S. Treasury open data</span>
+    </div>
+    <div class="coffee-wrap"><a class="coffee" href="https://www.buymeacoffee.com/dreamaiprojects" target="_blank" rel="noopener"><span class="cup">&#9749;</span> Buy me a coffee</a></div>
+  </div>
+</footer>
+
+<script>
+const SEC_PER_YEAR = 365.2425*86400;
+const $ = s => document.querySelector(s);
+const palette = ['#1f5138','#2f6a48','#3f8159','#4f976a','#5fa97c','#74b98f','#8a8f5a','#a9842c','#bb9a3e','#c9b15f','#9a322b'];
+// Honest ranking ramp: a smooth deep-green→gold gradient by RANK position (no random hues,
+// no wrap, no stray red) — color simply tracks magnitude, redundant with bar length.
+const GRAD = ['#1f5138','#2f6a48','#3f8159','#4f976a','#5fa97c','#74b98f','#8a8f5a','#a9842c','#bb9a3e','#c9b15f'];
+function lerpHex(a,b,t){ const p=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+  const x=p(a),y=p(b); return '#'+x.map((c,i)=>Math.round(c+(y[i]-c)*t).toString(16).padStart(2,'0')).join(''); }
+function rankColor(i,n){ if(n<=1) return GRAD[0];
+  const t=Math.max(0,Math.min(1,i/(n-1)))*(GRAD.length-1), lo=Math.floor(t);
+  return lerpHex(GRAD[lo], GRAD[Math.min(lo+1,GRAD.length-1)], t-lo); }
+// Who-we-owe categories — color now CARRIES the meaning (see legend), not decoration.
+const HOLDER_COLOR = { sovereign:'#1f5138', center:'#4a7c84', custody:'#b08526' };
+// Contractor sectors — same green/teal/gold family for a consistent visual language.
+const SECTOR_COLOR = { defense:'#1f5138', health:'#4a7c84', services:'#b08526' };
+const SECTOR_LABEL = { defense:'Defense &amp; weapons', health:'Health', services:'Services &amp; IT' };
+
+// ---------- formatters ----------
+function money(v){ // smart $X.XX trillion / billion
+  const a=Math.abs(v), s=v<0?'−':'';
+  if(a>=1e12) return s+'$'+(a/1e12).toFixed(2)+'<small>trillion</small>';
+  if(a>=1e9)  return s+'$'+(a/1e9).toFixed(0)+'<small>billion</small>';
+  if(a>=1e6)  return s+'$'+(a/1e6).toFixed(0)+'<small>million</small>';
+  return s+'$'+Math.round(a).toLocaleString();
+}
+function moneyShort(v){
+  const a=Math.abs(v), s=v<0?'−':'';
+  if(a>=1e12)  return s+'$'+(a/1e12).toFixed(2)+'T';
+  if(a>=100e9) return s+'$'+(a/1e9).toFixed(0)+'B';
+  if(a>=1e9)   return s+'$'+(a/1e9).toFixed(1)+'B';
+  return s+'$'+(a/1e6).toFixed(0)+'M';
+}
+function dollars(v){ return (v<0?'−':'')+'$'+Math.round(Math.abs(v)).toLocaleString(); }
+function plainBig(v){ return '$'+Math.round(v).toLocaleString(); }
+
+// ---------- count-up ----------
+function countUp(el, target, fmt, dur=1500){
+  const t0=performance.now();
+  function f(t){ const k=Math.min(1,(t-t0)/dur); const e=1-Math.pow(1-k,3);
+    el.innerHTML=fmt(target*e); if(k<1) requestAnimationFrame(f); }
+  requestAnimationFrame(f);
+}
+
+// ---------- spirograph (guilloché) ----------
+function spiroPath(R,r,d,turns,cx,cy,scale){
+  let p='', n=turns*240;
+  for(let i=0;i<=n;i++){ const t=i/n*turns*2*Math.PI;
+    const x=cx+scale*((R-r)*Math.cos(t)+d*Math.cos((R-r)/r*t));
+    const y=cy+scale*((R-r)*Math.sin(t)-d*Math.sin((R-r)/r*t));
+    p+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1); }
+  return p;
+}
+function drawSpiro(svg, opts){
+  const w=opts.w||900,h=opts.h||520; svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+  const sets=opts.sets||[[5,3,5,3],[7,4,4,5],[9,5,3,4]];
+  let inner='';
+  sets.forEach((s,i)=>{ const d=spiroPath(s[0],s[1],s[2],s[3], opts.cx??w*0.78, opts.cy??h*0.5, opts.scale??22);
+    inner+=`<path d="${d}" fill="none" stroke="${opts.stroke||'#d6b24a'}" stroke-width="${opts.sw||0.6}" opacity="${0.18+i*0.05}"/>`; });
+  svg.innerHTML=inner;
+}
+
+// ---------- bars ----------
+function buildBars(container, ribbon, rows, total, opts){
+  const pos = rows.filter(r=>r.amount>0);
+  const sumPos = pos.reduce((a,r)=>a+r.amount,0);
+  const max = Math.max(...rows.map(r=>Math.abs(r.amount)));
+  // ribbon (positive only)
+  ribbon.innerHTML='';
+  pos.forEach((r,i)=>{ const s=document.createElement('span');
+    s.style.background=rankColor(i,pos.length);
+    s.dataset.fg=String(r.amount/sumPos); s.style.flexGrow='0';
+    const pct=r.amount/sumPos*100;
+    if(pct>8.5){ s.classList.add('lab'); s.dataset.l=r.name; }
+    s.title=`${r.name} — ${moneyShort(r.amount)} (${pct.toFixed(1)}%)`;
+    ribbon.appendChild(s);
+  });
+  // bars
+  container.innerHTML='';
+  rows.forEach((r,i)=>{
+    const pct = r.amount/total*100;
+    const row=document.createElement('div'); row.className='bar'+(r.amount<0?' neg':'');
+    row.innerHTML=`<div class="name">${r.name}<span class="note">${r.note||''}</span></div>
+      <div class="track"><div class="fill" style="background:${r.amount<0?'#9a322b':rankColor(i,rows.length)}"></div></div>
+      <div class="amt"><span class="primary"></span><small>${pct>=0?pct.toFixed(1):'−'+Math.abs(pct).toFixed(1)}% of total</small></div>`;
+    container.appendChild(row);
+    row._data=r; row._max=max;
+    row.addEventListener('click',()=>row.classList.toggle('open'));
+  });
+  container._rows=rows; container._opts=opts; relabel(container,'total');
+}
+function relabel(container, mode){
+  const data=DATA, hh=data.meta.households;
+  container.querySelectorAll('.bar').forEach(row=>{
+    const r=row._data; let val, fmt;
+    if(mode==='house'){ val=r.amount/hh; fmt=dollars; }
+    else if(mode==='sec'){ val=r.amount/SEC_PER_YEAR; fmt=v=>dollars(v); }
+    else { val=r.amount; fmt=moneyShort; }
+    row.querySelector('.primary').textContent = fmt(val) + (mode==='sec'?'/s':'');
+  });
+}
+function fillBars(container){
+  container.querySelectorAll('.bar').forEach(row=>{
+    const r=row._data, max=row._max;
+    row.querySelector('.fill').style.width=(Math.abs(r.amount)/max*100)+'%';
+  });
+}
+function fillRibbon(ribbon){
+  ribbon.querySelectorAll('span').forEach(s=>{ s.style.flexGrow=s.dataset.fg; });
+}
+function buildShifts(){
+  const sh=DATA.shifts, rows=sh.categories;
+  const maxChg=Math.max(...rows.map(r=>Math.abs(r.share_chg)));
+  const el=$('#shiftRows'); el.innerHTML='';
+  rows.forEach(r=>{
+    const gain=r.share_chg>=0;
+    const w=Math.abs(r.share_chg)/maxChg*50;   // half the track at most
+    const div=document.createElement('div'); div.className='shiftrow '+(gain?'gain':'lose');
+    div.innerHTML=`
+      <div class="sname">${r.name}<span class="note">${r.note}${r.distorted?' <em>(swings reflect student-loan accounting, not real cuts)</em>':''}</span></div>
+      <div class="smult">${r.mult.toFixed(1)}×<small>10-yr growth</small></div>
+      <div class="sbar"><span class="zero"></span><span class="fill" style="${gain?'left:50%':'right:50%'}"></span></div>
+      <div class="schg">${gain?'+':'−'}${Math.abs(r.share_chg).toFixed(1)}<small>pts of budget</small></div>`;
+    div.querySelector('.fill')._w=w; el.appendChild(div);
+  });
+  $('#shiftNote').innerHTML=`Total outlays grew <b>${sh.avg_mult.toFixed(1)}×</b> from FY${sh.fy_from} to FY${sh.fy_to}. Each bar is a category's change in <b>share of the budget</b>; the number on the left is its raw-dollar growth over the decade. Interest (inside Treasury) is the great share-grabber; Defense grew too, but slower than the budget, so its slice shrank.`;
+}
+function fillShifts(){
+  $('#shiftRows').querySelectorAll('.fill').forEach(f=>{ f.style.width=f._w+'%'; });
+}
+function buildContractorBars(container, rows){
+  const max=Math.max(...rows.map(r=>r.amount));
+  container.innerHTML='';
+  rows.forEach((r,i)=>{
+    const row=document.createElement('div'); row.className='bar';
+    row.innerHTML=`<div class="name">${r.name}<span class="note">${r.note||''}</span></div>
+      <div class="track"><div class="fill" style="background:${SECTOR_COLOR[r.sector]||rankColor(i,rows.length)}"></div></div>
+      <div class="amt"><span class="primary">${moneyShort(r.amount)}</span><small>in contract obligations</small></div>`;
+    container.appendChild(row); row._data=r; row._max=max;
+    row.addEventListener('click',()=>row.classList.toggle('open'));
+  });
+  // legend + per-sector totals — color carries the sector story
+  const leg=$('#contractorLegend'); if(leg){
+    const tot={}; rows.forEach(r=>tot[r.sector]=(tot[r.sector]||0)+r.amount);
+    leg.innerHTML=['defense','health','services'].filter(s=>tot[s]).map(s=>
+      `<div><i style="background:${SECTOR_COLOR[s]}"></i><b>${SECTOR_LABEL[s]}</b> — ${moneyShort(tot[s])} across ${rows.filter(r=>r.sector===s).length} of the top ${rows.length}</div>`).join('');
+  }
+}
+// generic ranked bars (who-we-owe, by-state) — value + small caption; reuse fillBars to animate
+function buildRankBars(container, rows, fmt){
+  const max=Math.max(...rows.map(r=>r.value));
+  container.innerHTML='';
+  rows.forEach((r,i)=>{
+    const row=document.createElement('div'); row.className='bar';
+    row.innerHTML=`<div class="name">${r.label}<span class="note">${r.note||''}</span></div>
+      <div class="track"><div class="fill${r.cls?' '+r.cls:''}" style="background:${r.color||rankColor(i,rows.length)}"></div></div>
+      <div class="amt"><span class="primary">${fmt(r.value)}</span><small>${r.sub||''}</small></div>`;
+    row._data={amount:r.value}; row._max=max; container.appendChild(row);
+  });
+}
+function buildHhsSplit(h){
+  const bar=$('#hhsSplit'), leg=$('#hhsLegend'), cols=['#1f5138','#a9842c','#9a8f5a'];
+  bar.innerHTML=''; leg.innerHTML='';
+  h.parts.forEach((p,i)=>{
+    const s=document.createElement('span'); s.style.background=cols[i]; s.dataset.fg=String(p.amount); s.style.flexGrow='0';
+    const pct=p.amount/h.total*100; if(pct>13) s.textContent=`${p.name} ${moneyShort(p.amount)}`;
+    bar.appendChild(s);
+    leg.insertAdjacentHTML('beforeend',`<div><i style="background:${cols[i]}"></i><b>${p.name} — ${moneyShort(p.amount)}</b> (${pct.toFixed(0)}%) · ${p.note}</div>`);
+  });
+}
+function fillHhsSplit(){ $('#hhsSplit').querySelectorAll('span').forEach(s=>s.style.flexGrow=s.dataset.fg); }
+function buildWhoWeOwe(w){
+  const noteFor={center:'major financial center — real reserves mixed with custody',
+                 custody:'custody hub — debt is booked here, owned elsewhere'};
+  buildRankBars($('#wwoBars'), w.holders.map(h=>({label:h.name, value:h.amount,
+    color:HOLDER_COLOR[h.category]||HOLDER_COLOR.sovereign,
+    cls:h.category==='custody'?'hatch':'',
+    note:noteFor[h.category]||''})), moneyShort);
+  // legend — colour now carries the category
+  const C=cat=>HOLDER_COLOR[cat], byCat=cat=>w.holders.filter(h=>h.category===cat).map(h=>h.name.replace(', Mainland','')).join(', ');
+  $('#wwoLegend').innerHTML=[
+    ['sovereign','Sovereign reserves','foreign governments &amp; central banks holding Treasuries as official reserves'],
+    ['center','Financial centers','hold a mix of real reserves and foreign-owned custody — hard to disentangle'],
+    ['custody','Custody / pass-through','debt is recorded here but owned elsewhere (Euroclear, fund &amp; hedge-fund domiciles)'],
+  ].map(([cat,lbl,desc])=>`<div><i style="background:${C(cat)}"></i><b>${lbl}</b> — ${desc}. <span class="dim">${byCat(cat)}.</span></div>`).join('');
+  const t=w.trend, ch=t.find(x=>x.year===2013)||t[0], now=t[t.length-1];
+  $('#wwoNote').innerHTML=`Foreign holders own <b>${moneyShort(w.total_foreign)}</b> — about <b>${(w.total_foreign/w.debt_held_public*100).toFixed(0)}%</b> of the ${moneyShort(w.debt_held_public)} held by the public. China held ${moneyShort(ch.china)} in ${ch.year}; today just <b>${moneyShort(now.china)}</b>, behind Japan and the UK. <span class="dim">Color marks how the debt is held: green is a genuine sovereign creditor; gold (hatched) is a custody hub where the debt is counted at the custodian, not the true owner — so some real totals (e.g. China's, much of it parked in Belgium's Euroclear) run higher than the country line shows.</span>`;
+}
+function buildByState(sbs){
+  let lens='contracts', unit='total';
+  const noteFor={
+    contracts:d=>`FY${DATA.meta.fiscal_year} federal <b>contract obligations</b> — what Washington buys — by where the work is performed. Total across all states: <b>${moneyShort(d.total)}</b>. Per person it maps the national-security economy: Virginia, Maryland and D.C. (the Pentagon and intelligence belt), Connecticut (submarines &amp; jet engines), New Mexico (the weapons labs), Alaska &amp; Hawaii (forward bases). <span class="dim">Per-person uses 2020 census population.</span>`,
+    grants:d=>{const m=d.mix||[]; const top=m.slice(0,5).map(x=>`${x.name.replace('Department of ','').replace(' and Human Services',' &amp; Human Svcs')} ${moneyShort(x.amount)}`).join(', ');
+      return `FY${DATA.meta.fiscal_year} federal <b>grants returned to the states</b> — Medicaid, highways, food aid, schools, housing. Total: <b>${moneyShort(d.total)}</b>. The mix is dominated by health: ${top}. In total dollars the big-population states lead (California, New York, Texas); per person the order flips to D.C., Alaska, New Mexico and the Dakotas — smaller, higher-need places where each dollar covers fewer people, with the island territories highest of all. <span class="dim">Per-person uses 2020 census population.</span>`;}
+  };
+  const render=()=>{
+    const d=sbs[lens];
+    const arr=d.states.slice().sort((a,b)=> unit==='capita'? b.per_capita-a.per_capita : b.amount-a.amount).slice(0,15);
+    buildRankBars($('#stateBars'),
+      arr.map(s=>({label:s.name, value: unit==='capita'?s.per_capita:s.amount})),
+      unit==='capita' ? (v=>'$'+Math.round(v).toLocaleString()+'/ea') : moneyShort);
+    fillBars($('#stateBars'));
+    $('#stateNote').innerHTML=noteFor[lens](d);
+  };
+  $('#stateBars')._render=render; render();
+  $('#lensToggle').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b)return;
+    [...e.currentTarget.children].forEach(x=>x.setAttribute('aria-pressed', x===b)); lens=b.dataset.lens; render();});
+  $('#stateToggle').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b)return;
+    [...e.currentTarget.children].forEach(x=>x.setAttribute('aria-pressed', x===b)); unit=b.dataset.mode; render();});
+}
+function buildRateSlider(rt){
+  const range=$('#rateRange'), debt=rt.debt_total, base=rt.current_rate/100*debt;
+  range.min=(Math.floor(rt.trough*10)/10); range.max=7; range.step=0.05; range.value=rt.current_rate;
+  const upd=()=>{ const r=parseFloat(range.value), intr=r/100*debt, d=intr-base;
+    $('#rateVal').textContent=r.toFixed(2)+'%';
+    $('#rateInterest').innerHTML=money(intr);
+    $('#rateVs').innerHTML = Math.abs(d)<2e9 ? `about today's level` :
+      `<b>${money(Math.abs(d))}</b> ${d>0?'more':'less'} a year than today (${money(base)} at ${rt.current_rate.toFixed(2)}%)`;
+  };
+  range.addEventListener('input',upd); upd();
+  $('#rateTicks').innerHTML=`<span>2022 low&nbsp;<b>${rt.trough.toFixed(2)}%</b></span><span>today&nbsp;<b>${rt.current_rate.toFixed(2)}%</b></span><span>7%</span>`;
+}
+function buildDebtGdp(dg){
+  lineChart($('#debtGdpChart'),{ aria:'Federal debt as a share of GDP over time',
+    series:[ {id:'grg',color:'#9a322b',w:3.2,tag:Math.round(dg.gross_now)+'%',points:dg.gross},
+             {id:'pbg',color:'#2f6a48',w:3.2,tag:Math.round(dg.public_now)+'%',points:dg.public} ],
+    yfmt:v=>v.toFixed(0)+'%', yticks:4, ymax:Math.max(...dg.gross.map(p=>p.v))*1.12 });
+}
+
+// ---------- line / area chart ----------
+function lineChart(mount, opts){
+  const W=920,H=360, P={l:64,r:24,t:18,b:42};
+  const series=opts.series, all=series.flatMap(s=>s.points);
+  const xs=[...new Set(all.map(p=>p.fy))].sort((a,b)=>a-b);
+  const xmin=xs[0], xmax=xs[xs.length-1];
+  const ymax=opts.ymax||Math.max(...all.map(p=>p.v))*1.08, ymin=0;
+  const X=fy=>P.l+(fy-xmin)/(xmax-xmin)*(W-P.l-P.r);
+  const Y=v=>H-P.b-(v-ymin)/(ymax-ymin)*(H-P.t-P.b);
+  const col=opts.dark?'#f3ecd6':'#16241c';
+  let g=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;color:${col}" role="img" aria-label="${opts.aria||''}">`;
+  // y gridlines
+  const ticks=opts.yticks||4;
+  for(let i=0;i<=ticks;i++){ const v=ymax/ticks*i, y=Y(v);
+    g+=`<line class="gridln" x1="${P.l}" y1="${y}" x2="${W-P.r}" y2="${y}"/>`;
+    g+=`<text x="${P.l-10}" y="${y+4}" text-anchor="end" font-size="12" fill="${col}" opacity=".6">${opts.yfmt(v)}</text>`;
+  }
+  // x labels
+  xs.forEach((fy,i)=>{ if(xs.length>9 && i%2 && i!==xs.length-1) return;
+    g+=`<text x="${X(fy)}" y="${H-P.b+22}" text-anchor="middle" font-size="12" fill="${col}" opacity=".6">'${String(fy).slice(2)}</text>`; });
+  // optional area between two point-arrays (the deficit gap)
+  if(opts.fillBetween){ const [a,b]=opts.fillBetween;
+    let d='M'+a.map(p=>X(p.fy)+' '+Y(p.v)).join(' L ');
+    const br=[...b].reverse();
+    d+=' L '+br.map(p=>X(p.fy)+' '+Y(p.v)).join(' L ')+' Z';
+    g+=`<path d="${d}" fill="${opts.fillColor||'#9a322b'}" opacity=".16"/>`;
+  }
+  series.forEach(s=>{
+    const dline='M'+s.points.map(p=>X(p.fy)+' '+Y(p.v)).join(' L ');
+    if(s.fill){ const area=dline+` L ${X(xmax)} ${Y(0)} L ${X(xmin)} ${Y(0)} Z`;
+      g+=`<path d="${area}" fill="url(#grad_${s.id})" opacity=".5"/>`;
+      g+=`<defs><linearGradient id="grad_${s.id}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="${s.color}" stop-opacity=".55"/><stop offset="1" stop-color="${s.color}" stop-opacity="0"/></linearGradient></defs>`;
+    }
+    const len=2600;
+    g+=`<path class="anim-line" d="${dline}" fill="none" stroke="${s.color}" stroke-width="${s.w||3}" stroke-linejoin="round" stroke-linecap="round"
+        stroke-dasharray="${len}" stroke-dashoffset="${len}"/>`;
+    // end dot + value
+    const last=s.points[s.points.length-1];
+    g+=`<circle cx="${X(last.fy)}" cy="${Y(last.v)}" r="4.5" fill="${s.color}"/>`;
+    if(s.tag) g+=`<text x="${X(last.fy)-8}" y="${Y(last.v)-12}" text-anchor="end" font-size="13" font-weight="600" fill="${s.color}">${s.tag}</text>`;
+  });
+  g+='</svg>';
+  mount.innerHTML=g;
+  return mount;
+}
+function animateLines(mount){
+  mount.querySelectorAll('.anim-line').forEach((p,i)=>{
+    p.style.transition=`stroke-dashoffset 1.8s ${0.15*i}s cubic-bezier(.4,0,.1,1)`;
+    requestAnimationFrame(()=>{ p.style.strokeDashoffset='0'; });
+  });
+}
+
+// ---------- main ----------
+let DATA;
+fetch('data.json',{cache:'no-store'}).then(r=>{
+  if(!r.ok) throw new Error('data.json returned HTTP '+r.status);
+  return r.text();
+}).then(txt=>{
+  let data;
+  try{ data=JSON.parse(txt); }
+  catch(_){ throw new Error('data.json was not valid JSON — this page is likely being served from a path where the data file is missing (e.g. an undeployed build serving a fallback page).'); }
+  DATA=data; const t=data.topline, m=data.meta, hh=m.households;
+
+  // hero
+  $('#fyTag').textContent='Fiscal Year '+m.fiscal_year;
+  $('#fyA').textContent=m.fiscal_year;
+  countUp($('#heroOutlays'), t.outlays, money, 1700);
+  countUp($('#heroReceipts'), t.receipts, money, 1700);
+
+  // live debt clock — start from value, advance by elapsed time since debt_as_of, then tick
+  const base=t.national_debt, rate=t.debt_growth_per_sec;
+  const asOf=new Date(m.debt_as_of+'T00:00:00Z').getTime();
+  const clock=$('#debtClock');
+  $('#debtRate').textContent='climbing '+dollars(rate)+' every second';
+  // Throttle the live clock to ~10 updates/sec, and pause it once scrolled past the hero.
+  // (A per-frame DOM write here kept the whole page's render pipeline churning every frame —
+  // visible as intermittent flicker/jank while scrolling. The value is derived from elapsed
+  // time, so skipping frames never drifts.)
+  const clockBottom = clock.getBoundingClientRect().bottom + window.scrollY;
+  let lastTick = 0;
+  function tickDebt(ts){
+    if(ts - lastTick >= 100){
+      if(window.scrollY < clockBottom) clock.textContent = plainBig(base + rate*((Date.now()-asOf)/1000));
+      lastTick = ts;
+    }
+    requestAnimationFrame(tickDebt);
+  }
+  requestAnimationFrame(tickDebt);
+
+  // spiros
+  drawSpiro($('#heroSpiro'),{w:1000,h:700,cx:820,cy:300,scale:30,sw:0.5,stroke:'#d6b24a',sets:[[5,3,7,3],[7,4,5,4],[11,6,4,5],[8,5,6,3]]});
+  drawSpiro($('#balSpiro'),{w:600,h:360,cx:500,cy:180,scale:15,sw:0.5,stroke:'#d6b24a'});
+  drawSpiro($('#debtSpiro'),{w:1100,h:760,cx:180,cy:560,scale:34,sw:0.5,stroke:'#d6b24a',sets:[[9,5,5,5],[7,4,5,4],[13,7,4,6]]});
+  if($('#tariffSpiro')) drawSpiro($('#tariffSpiro'),{w:1100,h:700,cx:900,cy:300,scale:30,sw:0.5,stroke:'#d6b24a',sets:[[5,3,7,3],[8,5,5,4],[11,6,4,5]]});
+
+  // balance
+  $('#balIn').innerHTML=money(t.receipts);
+  $('#balOut').innerHTML=money(t.outlays);
+  $('#balGap').innerHTML=money(Math.abs(t.deficit));
+  const spent=t.outlays/t.receipts;
+  $('#pqSpent').textContent='$'+spent.toFixed(2);
+  $('#balCap').innerHTML=`The deficit works out to <b>${dollars(Math.abs(t.deficit)/hh)}</b> per household — borrowed and added to the debt this year alone.`;
+
+  // where it goes
+  buildBars($('#goesBars'), $('#goesRibbon'), data.agencies, t.outlays, {});
+  $('#goesToggle').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return;
+    [...e.currentTarget.children].forEach(x=>x.setAttribute('aria-pressed', x===b));
+    relabel($('#goesBars'), b.dataset.mode);
+  });
+
+  // how the budget shifted
+  buildShifts();
+
+  // where it comes from
+  buildBars($('#comesBars'), $('#comesRibbon'), data.receipts, t.receipts, {});
+
+  // who cashes the checks (contractors)
+  if(data.contractors && data.contractors.length){
+    buildContractorBars($('#contractBars'), data.contractors);
+    const top=data.contractors[0];
+    const ag=n=>{const a=data.agencies.find(x=>x.name===n);return a?a.amount:0;};
+    const combo=ag('State')+ag('Interior');
+    const cmp = top.amount>combo
+      ? `more than the State and Interior departments spend, combined`
+      : `roughly ${(top.amount/ag('Interior')).toFixed(1)}× what the Interior Department spends`;
+    $('#contractPq').innerHTML=`<b>${top.name}</b> alone was awarded <span class="red">${moneyShort(top.amount)}</span> in federal contract obligations in one year — ${cmp}.`;
+  }
+
+  // cost of debt — comparison cards (NET interest paid to the public)
+  const defense = t.defense_military || data.agencies.find(a=>/Defense/.test(a.name)).amount;
+  const ratioDef=(t.interest/defense);
+  $('#debtCmp').innerHTML=`
+    <div class="card"><div class="v">${moneyShort(t.interest)}</div><div class="k">paid in <b>net interest</b> on the national debt in ${m.fiscal_year}</div></div>
+    <div class="card"><div class="v">${ratioDef.toFixed(1)}×</div><div class="k">larger than the entire <b>military budget</b> (${moneyShort(defense)})</div></div>
+    <div class="card"><div class="v">${dollars(t.interest/hh)}</div><div class="k">every household's share of <b>interest alone</b>, each year</div></div>`;
+
+  // interest chart
+  lineChart($('#interestChart'),{ dark:true, aria:'Interest on the national debt rising over time',
+    series:[{id:'int',color:'#d6b24a',w:3.4,fill:true,tag:moneyShort(t.interest),points:data.trends.interest}],
+    yfmt:v=>'$'+(v/1e12).toFixed(1)+'T', yticks:4, ymax:Math.max(...data.trends.interest.map(p=>p.v))*1.12 });
+
+  // the rise of the tariff
+  if(data.tariff){
+    const tf=data.tariff;
+    $('#tariffCmp').innerHTML=`
+      <div class="card"><div class="v">${moneyShort(tf.now)}</div><div class="k">collected in <b>tariffs</b> in ${m.fiscal_year} — up from ${moneyShort(tf.prev)} the year before</div></div>
+      <div class="card"><div class="v">${tf.yoy_mult.toFixed(1)}×</div><div class="k">in a <b>single year</b> (+${Math.round((tf.yoy_mult-1)*100)}%) — and ${tf.decade_mult.toFixed(1)}× over the decade</div></div>
+      <div class="card"><div class="v">${tf.share_to.toFixed(1)}%</div><div class="k">of all federal revenue, up from <b>${tf.share_from.toFixed(1)}%</b> a decade ago</div></div>`;
+    lineChart($('#tariffChart'),{ dark:true, aria:'Customs duties rising sharply in FY2025',
+      series:[{id:'tar',color:'#d6b24a',w:3.4,fill:true,tag:moneyShort(tf.now),points:tf.series}],
+      yfmt:v=>'$'+(v/1e9).toFixed(0)+'B', yticks:4, ymax:Math.max(...tf.series.map(p=>p.v))*1.15 });
+  }
+
+  // new sections (2026-06-18)
+  if(data.hhs_split) buildHhsSplit(data.hhs_split);
+  if(data.spending_by_state) buildByState(data.spending_by_state);
+  else if(data.contracts_by_state) buildByState({contracts:{...data.contracts_by_state,mix:[]},grants:{states:[],total:0,mix:[]}});
+  if(data.rates) buildRateSlider(data.rates);
+  if(data.who_we_owe) buildWhoWeOwe(data.who_we_owe);
+  if(data.debt_gdp) buildDebtGdp(data.debt_gdp);
+
+  // gap chart
+  const out=data.trends.outlays, rec=data.trends.receipts;
+  const gymax=Math.max(...out.map(p=>p.v))*1.1;
+  lineChart($('#gapChart'),{ aria:'Federal spending versus revenue over time',
+    fillBetween:[out,rec], fillColor:'#9a322b',
+    series:[ {id:'out',color:'#a9842c',w:3.2,tag:'Spending',points:out},
+             {id:'rec',color:'#2f6a48',w:3.2,tag:'Revenue',points:rec} ],
+    yfmt:v=>'$'+(v/1e12).toFixed(0)+'T', yticks:4, ymax:gymax });
+
+  // methodology
+  $('#mFy').textContent='fiscal year '+m.fiscal_year;
+  $('#mPer').textContent=m.fy_period;
+  $('#mHh').textContent=(m.households/1e6).toFixed(1)+' million';
+  $('#cfDate').textContent=new Date(m.generated+'T00:00:00').toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  $('#cfDebt').textContent=new Date(m.debt_as_of+'T00:00:00').toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  $('#srcList').innerHTML=m.sources.map(s=>`<li>${s}</li>`).join('');
+
+  // reveal + chart/bar animations as each band scrolls into view (robust scroll handler)
+  function triggerBand(id){
+    if(id==='goes'){ fillBars($('#goesBars')); fillRibbon($('#goesRibbon')); }
+    if(id==='shifts'){ fillShifts(); }
+    if(id==='comes'){ fillBars($('#comesBars')); fillRibbon($('#comesRibbon')); }
+    if(id==='contracts'){ fillBars($('#contractBars')); }
+    if(id==='balance'){ const f=$('#balMeter').children;
+      f[0].style.flexGrow=String(t.receipts); f[1].style.flexGrow=String(Math.abs(t.deficit)); }
+    if(id==='debt'){ animateLines($('#interestChart')); }
+    if(id==='tariff'){ animateLines($('#tariffChart')); }
+    if(id==='hhs'){ fillHhsSplit(); }
+    if(id==='bystate'){ fillBars($('#stateBars')); }
+    if(id==='whoweowe'){ fillBars($('#wwoBars')); }
+    if(id==='gap'){ animateLines($('#gapChart')); }
+    if(id==='debtgdp'){ animateLines($('#debtGdpChart')); }
+  }
+  function checkReveals(){
+    const vh=window.innerHeight||document.documentElement.clientHeight;
+    document.querySelectorAll('.band').forEach(b=>{
+      if(b.classList.contains('in')) return;
+      const r=b.getBoundingClientRect();
+      if(r.top < vh*0.85 && r.bottom > 0){ b.classList.add('in'); triggerBand(b.id); }
+    });
+  }
+  window.addEventListener('scroll',checkReveals,{passive:true});
+  window.addEventListener('resize',checkReveals);
+  checkReveals();
+}).catch(e=>{
+  const box=document.createElement('div');
+  box.style.cssText='position:fixed;inset:auto 0 0 0;z-index:99;background:#9a322b;color:#f3ecd6;padding:14px 22px;font:500 14px/1.5 Inter,sans-serif;text-align:center';
+  box.innerHTML='<b>The data couldn\'t load.</b> '+String(e.message||e)+' &nbsp;Try reloading.';
+  document.body.appendChild(box);
+  console.error('[The Ledger] data load failed:',e);
+});
+</script>
+</body>
+</html>
