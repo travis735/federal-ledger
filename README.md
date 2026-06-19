@@ -35,6 +35,16 @@ python3 scripts/build-ledger-data.py   # writes data.json
 
 The builder validates that the agency lines sum to total outlays, that receipts − outlays equals the reported deficit, and that the named figures reconcile to the published totals — no guessed numbers.
 
+## Deploying
+
+> ⚠️ **`git push` does NOT deploy this site.** federal-ledger is a Cloudflare Pages **direct-upload** project, not git-connected. Pushing to GitHub only updates the source — the live site at [federal-ledger.pages.dev](https://federal-ledger.pages.dev/) changes **only** when you run the deploy.
+
+```bash
+./deploy.sh        # = npx wrangler pages deploy . --project-name=federal-ledger
+```
+
+So the publish flow after any edit is: edit → `./deploy.sh` (live site) → `git push` (source on GitHub).
+
 ## Note
 
 The budget figures are reported straight from the Treasury and are non-partisan. The framing and the "Leads" section are editorial — pointers for further reporting, not neutral fact.

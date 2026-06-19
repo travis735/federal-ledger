@@ -1,0 +1,11 @@
+# Files NOT served by Cloudflare Pages — keeps the live site to just the site assets.
+.git
+.gitignore
+.assetsignore
+.wrangler
+README.md
+LICENSE
+deploy.sh
+scripts
+node_modules
+*.mp4
